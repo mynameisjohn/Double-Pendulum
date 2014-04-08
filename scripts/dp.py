@@ -1,11 +1,9 @@
 # 
 # 
-# File: batUtil.py
+# File: dp.py
 #
-# Description: A script that generates a graphical user interface designed for
-# easy interaction with a scale model of the Tadarida Brasiliensis bat. The GUI allows
-# for posing of the model at 18 specific keyframes during its wing cycle, and also allows
-# for rendering of both the entire cycle and individual frames. 
+# A script designed to work with a hierarchically organized scene file in Maya in order to drive
+# a double pendulum animation. Can be solved using RK4 or Euler. 
 # 
 # Author: John Joseph
 #
@@ -23,6 +21,15 @@ def ddTh2(th1,th2,dTh1,dTh2):
 #Advance x0 by v*dt via Euler Method
 def eulerAdvance(x0, v, dt):
   return x0 + dt * v
+  
+def solveEuler(data,dt):
+	wDot1=ddTh1(data[0],data[1],data[2],data[3])-0.1*data[2]
+	wDot2=ddTh2(data[0],data[1],data[2],data[3])-0.1*data[1]
+	data[0]=eulerAdvance(data[0],data[2],dt)
+	data[1]=eulerAdvance(data[1],data[3],dt)
+	data[2]=eulerAdvance(data[2],wDot1,dt)
+	data[3]=eulerAdvance(data[3],wDot2,dt)
+	return
 
 #Numerically solve equation via RK4
 def solveRK(data, dt):
@@ -107,7 +114,8 @@ while (t<tMax):
 	cmds.setKeyframe("doublePendulum|top.rx")
 	cmds.setKeyframe("bottom.rx")
 	
-	solveRK(data,DT)
+	#solveRK(data,DT)
+	solveEuler(data,DT)
 	
 	#update the current frame and current time
 	currentFrame = currentFrame+updateRate
